@@ -23,4 +23,4 @@ and posters. Eventually this repository will cover all my work.
 >  Processing and on Computational Natural Language Learning (EMNLP-CoNLL-2007)_,
 >  page 1-11. Prague, Czech Republic.
 
-[conll2010]: http://jamesclarke.net/research/emnlp2007
+[emnlp2007]: http://jamesclarke.net/research/emnlp2007
