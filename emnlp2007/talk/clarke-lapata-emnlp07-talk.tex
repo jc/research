@@ -1,0 +1,790 @@
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \usetheme[secheader]{Madrid}
+  \useoutertheme{default}
+  \setbeamercovered{transparent}
+}
+
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+
+%\usepackage[noeepic]{qtree}
+%\usepackage{linguex}
+%\usepackage{synttree}
+\usepackage{graphicx,fancybox}
+\usepackage{tabularx,url}
+%\usepackage{parsetree}
+
+%% for diagonals
+%\usepackage{tree-dvips}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% beamer customization
+
+%modified footer with page number
+\makeatletter
+\usefoottemplate{%
+  \vbox{\tiny%
+  \hbox{%
+  \setbox\beamer@linebox=\hbox to\paperwidth{%
+    \hbox to.5\paperwidth{\hfill\tiny\color{white}\textbf{\insertshortauthor}\hskip.3cm}%
+    \hbox to.5\paperwidth{\hskip.3cm\tiny\color{white}\textbf{\insertshorttitle\hfill\insertframenumber}\hskip.3cm}}%
+  \ht\beamer@linebox=2.625ex%
+  \dp\beamer@linebox=0pt%
+  \setbox\beamer@linebox=\vbox{\box\beamer@linebox\vskip1.125ex}%
+  \color{black}\hskip-\Gm@lmargin\vrule width.5\paperwidth
+  height\ht\beamer@linebox\color{structure}\vrule width.5\paperwidth
+  height\ht\beamer@linebox\hskip-\paperwidth% 
+  \hbox{\box\beamer@linebox\hfill}\hfill\hskip-\Gm@rmargin}}}
+\makeatother
+\usepackage{babel}
+
+\newcommand{\word}[1]{\textit{#1}}
+\newcommand{\ent}[1]{\textcolor{blue}{#1}}
+\newcommand{\fixed}[1]{\textcolor{blue}{#1}}
+\newcommand{\cent}[1]{\textcolor{red}{#1}}
+\newcommand{\remove}[1]{\textcolor{gray}{#1}}
+\newcommand{\chain}[1]{\textcolor{gray}{#1}}
+\newcommand{\chaina}[1]{\textcolor{blue}{#1}}
+\newcommand{\chainb}[1]{\textcolor{orange}{#1}}
+\newcommand{\chainc}[1]{\textcolor{magenta}{#1}}
+\newcommand{\chaind}[1]{\textcolor{brown}{#1}}
+\newcommand{\chaine}[1]{\textcolor{violet}{#1}}
+\newcommand{\chainf}[1]{\textcolor{purple}{#1}}
+\newcommand{\argmax}[1]{\operatornamewithlimits{argmax}}
+\newcommand{\vectorn}[1]{\ensuremath{\mathbf{#1}}}
+
+\definecolor{tablecompressioncolour}{rgb}{0.6,0.8,1.0}
+\definecolor{tableoriginalcolour}{cmyk}{0,0,0,0.15}
+
+
+\title[] % (optional, use only with long paper titles)
+{Modelling Compression with Discourse Constraints}
+
+\subtitle{} % (optional)
+
+\author[James Clarke and Mirella Lapata]
+{James Clarke and Mirella Lapata}
+
+\institute[University of Edinburgh] % (optional, but mostly needed)
+{
+  School of Informatics \\
+  University of Edinburgh
+}
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date[] % (optional)
+{EMNLP 2007, Prague}
+
+\subject{Talks}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+
+\begin{document}
+
+\section*{Introduction}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Sentence Compression}
+
+\subsection{Definition and Overview}
+
+\begin{frame}
+  \frametitle{What is Sentence Compression?}
+
+\begin{block}{The task}
+To produce a summary of a single sentence by:
+
+      \begin{itemize}
+      \item using \alert{less} words than the original
+      \item preserving the most \alert{important information}
+      \item remaining \alert{grammatical}
+      \end{itemize}
+\end{block}
+    
+ \vspace{2ex}
+\onslide+<2>{\textbf{Simplification:} 
+    Given an input sentence of words $W = w_1, w_2, \dots , w_n$, a
+    compression is formed by dropping any subset of these
+    words (Knight and Marcu 2002). 
+}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Why Sentence Compression?}
+
+\begin{block}{Applications}
+\begin{itemize}
+\item concise summary generation  (Jing 2000, Lin 2003)
+\item subtitle generation for TV programmes (Vandeghinste et
+  al. 2004)
+\item document display on small screens (Corston-Oliver 2001)
+\item audio scanning devices for the blind (Grefenstette 1998)
+\end{itemize}
+\end{block}
+  \vspace{2ex}
+\onslide+<2>{\textbf{Paradox:} applications act on \alert{whole
+    documents} but compression by definition operates on  isolated sentences.}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}
+  \frametitle{Previous Work}
+  
+
+  \begin{block}{Sentence-based models}
+  Most use a parallel corpus with features defined over:
+
+  \begin{itemize}
+  \item words (Hori and Furui 2004)
+  \item parse trees (Knight and Marcu 2000, Jing 2000, Riezler et al 2003,
+    McDonald 2006, Galley and McKeown 2007)
+  \item semantic concepts (Jing 2000)
+  \end{itemize}
+\end{block}
+
+ \vspace{2ex}
+\onslide+<2>{\textbf{Caveat:} \alert{context} influences what
+  information is important; the resulting compressed document should
+  be \alert{coherent}. 
+
+}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \frametitle{This Work}
+
+\textbf{We aim to:}
+\begin{itemize}
+\item build a compression model that is contextually aware
+\item apply this model to entire documents
+\end{itemize}
+
+\textbf{We need to:} 
+\begin{itemize}
+\item represent the \alert{flow of discourse} in text
+\item process documents automatically and robustly 
+\end{itemize} 
+
+\textbf{We focus on:}
+    \begin{itemize}
+    \item  representations of \alert{local coherence}
+    \item  prerequisite for global coherence
+    \item amenable to shallow processing
+   \end{itemize}
+\end{frame}
+
+
+
+\subsection{Compression beyond Sentences}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Discourse Representation}
+
+\begin{block}{Centering Theory (Grosz et al. 1995)}
+  \begin{itemize}
+    \item Entity-orientated theory of local coherence (Grosz et al. 1995)
+    \item \alert{Entities} in an \alert{utterance} are ranked according to
+      salience
+    \item Each utterance has one \alert{center} ($\approx$  topic or focus)
+    \item Coherent discourses have utterances with  common centers
+    \end{itemize}
+\end{block}
+
+\onslide+<2>{
+\begin{block}{Lexical Chains (Halliday and Hasan 1976)}
+\begin{itemize}
+  \item Representation of lexical cohesion  (Halliday and Hasan 1976)
+  \item Degree of \alert{semantic relatedness} among words in document
+  \item \alert{Dense} and \alert{long} chains signal the main topic of
+    the document
+  \item Coherent texts have more  related words than
+    incoherent ones
+  \end{itemize}
+\end{block}
+}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Example Discourse}
+  \begin{exampleblock}{}
+    \begin{center}
+     \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+1&   Bad weather dashed hopes of attempts to halt the flow during
+      what was seen as a lull in the lava's momentum. \\
+2 &  Some experts say that even if the eruption stopped today, the
+      pressure of lava piled up behind for six miles would bring
+      debris cascading down on to the town anyway. \\
+3 &  Some estimate the volcano is pouring out one million tons of
+      debris a day, at a rate of 15ft per second, from a fissure that
+      opened in mid-December. \\
+4&   The Italian Army yesterday detonated 400lb of dynamite
+      3,500 feet up Mount Etna's slopes. \\
+    \end{tabularx}
+    \end{center}
+  \end{exampleblock}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Centering Algorithm}
+ \only<1>{\begin{exampleblock}{}
+    \begin{center}
+      \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+        \uncover<2>{\visible<1>{1} & Bad weather dashed hopes of attempts to
+        halt the flow during what was seen as a lull in the lava's momentum.} \\
+        \visible<1>{2} & Some experts say that even if the
+        eruption stopped today, the pressure of lava piled up behind
+        for six miles would bring
+        debris cascading down on to the town anyway. \\
+      \end{tabularx}
+    \end{center}
+  \end{exampleblock}}
+  \only<2-3>{\begin{exampleblock}{}
+    \begin{center}
+      \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+        \uncover<4>{1 & Bad weather dashed hopes of attempts to
+        halt the flow during what was seen as a lull in the lava's momentum.} \\
+        2 & Some \ent{\textbf{experts}} say that even if the \ent{\textbf{eruption}}
+        stopped \ent{\textbf{today}}, the \textbf{\ent{pressure}} of
+        \textbf{\ent{lava}} piled up 
+        behind for six \textbf{\ent{miles}} would bring
+        \ent{\textbf{debris}} cascading down on to the \textbf{\ent{town}} anyway. \\
+      \end{tabularx}
+    \end{center}
+  \end{exampleblock}}
+  \only<4>{\begin{exampleblock}{}
+    \begin{center}
+      \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+        1 & Bad \textbf{\ent{weather}} dashed \ent{\textbf{hopes}} of
+        \ent{\textbf{attempts}} to
+        halt the \ent{\textbf{flow}} during what was seen as a \ent{\textbf{lull}} in the \ent{\textbf{lava}}'s \ent{\textbf{momentum}}. \\
+        2 & Some \ent{\textbf{experts}} say that even if the \ent{\textbf{eruption}}
+        stopped \ent{\textbf{today}}, the \ent{\textbf{pressure}} of \ent{\textbf{lava}} piled up
+        behind for six \ent{\textbf{miles}} would bring
+        \ent{\textbf{debris}} cascading down on to the \ent{\textbf{town}} anyway. \\
+      \end{tabularx}
+    \end{center}
+  \end{exampleblock}}
+  \only<5>{\begin{exampleblock}{}
+    \begin{center}
+      \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+        1. & Bad weather dashed hopes of attempts to
+        halt the flow during what was seen as a lull in the \cent{\textbf{lava}}'s momentum. \\
+        2. & Some experts say that even if the
+        eruption stopped today, the pressure of \cent{\textbf{lava}} piled up behind
+        for six miles would bring
+        debris cascading down on to the town anyway. \\
+      \end{tabularx}
+    \end{center}
+  \end{exampleblock}}
+
+\begin{enumerate}
+\onslide+<2-> \item Extract entities from $U_2$.
+\onslide+<3->\item Rank the entities in $U_2$ according to their
+grammatical role. (subject $>$ objects $>$ others)
+\onslide+<4->\item Find highest ranked entity in $U_{1}$ which occurs
+in $U_2$. Set entity to be center of $U_2$. 
+\end{enumerate}
+%\end{block}}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Annotated Discourse}
+  \begin{exampleblock}{}
+    \begin{center}
+    \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+1&      Bad weather dashed hopes of attempts to halt the flow during
+      what was seen as a lull in the \cent{\textbf{lava}}'s momentum. \\
+2&      Some experts say that even if the eruption stopped today, the
+      pressure of \cent{\textbf{lava}} piled up behind for six miles would
+      bring
+      \cent{\textbf{debris}} cascading down on to the town anyway. \\
+3&      Some estimate the volcano is pouring out one million tons of
+      \cent{\textbf{debris}} a day, at a rate of 15ft per second, from a
+      fissure that
+      opened in mid-December. \\
+4&      The Italian Army yesterday detonated 400lb of dynamite
+      3,500 feet up Mount Etna's slopes. \\
+    \end{tabularx}
+    \end{center}
+  \end{exampleblock}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Lexical Chain Algorithm}
+  \begin{columns}
+    \column{6.7cm}
+      \only<1>{\begin{tabular}{c|ccc}
+         & \visible<2>{\textbf{$<$Lava$>$}} & \visible<2>{\textbf{$<$Weight$>$}} & \visible<2>{\textbf{$<$Time$>$}} \\
+          \hline
+        1 & \textbf{--} & \textbf{--} & \textbf{--} \\
+        2 & \textbf{--} & \textbf{--} & \textbf{--} \\
+        3 & \textbf{--} & \textbf{--} & \textbf{--} \\
+        4 & \textbf{--} & \textbf{--} & \textbf{--} \\
+        5 & \textbf{--} & \textbf{--} & \textbf{--} \\
+        6 & \textbf{--} & \textbf{--} & \textbf{--} \\
+        7 & \textbf{--} & \textbf{--} & \textbf{--}  \\
+        8 & \textbf{--} & \textbf{--} & \textbf{--}   \\ \hline
+          & & & \\ 
+        \visible<4>{Score & 5 & 2 & 4 }
+      \end{tabular}}
+      \only<2-4>{\begin{tabular}{c|ccc}
+          & \textbf{Lava} & \textbf{Weight} & \textbf{Time} \\
+          \hline
+        1 & \textbf{X} & \textbf{--} & \textbf{X} \\
+        2 & \textbf{X} & \textbf{--}  & \textbf{--} \\
+        3 & \textbf{--} & \textbf{--} & \textbf{X} \\
+        4 & \textbf{X} & \textbf{X} & \textbf{X} \\
+        5 & \textbf{X} & \textbf{X} & \textbf{--} \\
+        6 & \textbf{--} & \textbf{--} & \textbf{X} \\
+        7 & \textbf{X} & \textbf{--}  & \textbf{--}  \\
+        8 & \textbf{--}  & \textbf{--}  & \textbf{--}  \\\hline
+        & & & \\
+        \visible<4>{Score & 5 & 2 & 4 }
+      \end{tabular}}
+      \only<5>{\begin{tabular}{c|ccc}
+        & \textbf{Lava} & \textbf{\remove{Weight}} & \textbf{Time} \\
+        \hline
+        1 & \textbf{X} & \textbf{--} & \textbf{X} \\
+        2 & \textbf{X} & \textbf{--}  & \textbf{--} \\
+        3 & \textbf{--} & \textbf{--} & \textbf{X} \\
+        4 & \textbf{X} & \remove{\textbf{X}} & \textbf{X} \\
+        5 & \textbf{X} & \remove{\textbf{X}} & \textbf{--} \\
+        6 & \textbf{--} & \textbf{--} & \textbf{X} \\
+        7 & \textbf{X} & \textbf{--}  & \textbf{--}  \\
+        8 & \textbf{--}  & \textbf{--}  & \textbf{--}  \\\hline
+       & & & \\
+        \visible<5>{Score} & \visible<5>{5} & \visible<5>{\remove{2}} & \visible<5>{4}
+      \end{tabular}}
+       \only<6->{\begin{tabular}{c|cc}
+        & \textbf{Lava} & \textbf{Time} \\
+        \hline
+        1 & \chaina{\textbf{X}}  & \chaina{\textbf{X}} \\
+        2 & \chaina{\textbf{X}}  & \textbf{--} \\
+        3 & \textbf{--}          & \chaina{\textbf{X}} \\
+        4 & \chaina{\textbf{X}}  & \chaina{\textbf{X}} \\
+        5 & \chaina{\textbf{X}}  & \textbf{--} \\
+        6 & \textbf{--}          & \chaina{\textbf{X}} \\
+        7 & \chaina{\textbf{X}}  & \textbf{--}  \\
+        8 & \textbf{--}          & \textbf{--}  \\ \hline
+        &  & \\
+        \visible<6->{Score & 5  & 4}
+      \end{tabular}}    
+
+  \column{7cm}
+   \begin{enumerate}
+\onslide+<2->\item Compute chains for document (Galley  and McKeown 2003).  
+\onslide+<4->\item $\mathit{Score}(\mathit{Chain}) =
+      \mathit{Sent}(\mathit{Chain})$ 
+\onslide+<5->\item \mbox{$\mathit{Score}(\mathit{Chain}) < \mathit{Avg}(\mathit{Score})$.}
+\onslide+<6-> \item Mark terms   in  chains as topic.
+    \end{enumerate}
+
+  \end{columns}
+
+
+
+  \begin{itemize}
+ \onslide+<3> \item \textbf{Lava} : $\{$lava, lava, lava, magma, lava$\}$
+ \onslide+<3> \item \textbf{Weight} : $\{$tons, lbs$\}$
+ \onslide+<3> \item \textbf{Time} : $\{$day, today, yesterday, second$\}$
+  \end{itemize}
+
+\vspace{-4em}
+ \begin{itemize}
+ \onslide+<6> \item \textbf{Lava} : $\{$lava, lava, lava, magma, lava$\}$
+ \onslide+<6> \item \textbf{Time} : $\{$day, today, yesterday, second$\}$
+  \end{itemize}
+
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Annotated Discourse}
+  \begin{exampleblock}{}
+    \begin{center}
+    \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+1  &    Bad \chaina{\textbf{weather}} dashed hopes of attempts to halt the   \chaina{\textbf{flow}} during
+      what was seen as a lull in the \cent{\textbf{lava}}'s momentum. \\
+2  &    Some experts say that even if the eruption stopped
+      \chaina{\textbf{today}}, the pressure of \cent{\textbf{lava}} piled up behind for
+      six \chaina{\textbf{miles}} would bring
+      \cent{\textbf{debris}} cascading down on to the \chaina{\textbf{town}} anyway. \\
+3  &    Some estimate the volcano is pouring out one million tons of
+      \cent{\textbf{debris}} a \chaina{\textbf{day}}, at a \chaina{\textbf{rate}} of 15\chaina{\textbf{ft}}
+      per \chaina{\textbf{second}}, from a fissure that
+      opened in mid-December. \\
+4  &    The Italian Army \chaina{\textbf{yesterday}} detonated 400lb of dynamite
+      3,500 feet up Mount Etna's slopes. \\
+    \end{tabularx}
+    \end{center}
+  \end{exampleblock}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Compression Model}
+
+\subsection{ILP framework}
+
+\begin{frame}
+  \frametitle{Integer Linear Programming}
+\textbf{Properties:}
+  \begin{itemize}
+  \item linear objective function
+  \item decision variables (variables under our control)
+  \item constraints over decision variables
+  \end{itemize}
+
+\vspace{.5ex}
+%\onslide+<2>{
+\textbf{Advantages:}
+  \begin{itemize}
+  \item find the \alert{global} minimum or maximum value of 
+    \alert{objective function} (Germann et al 2001, McDonald 2007)
+  \item incorporate global \alert{constraints} over the output space\\ (Roth and
+    Yih 2004, Riedel and Clarke 2006)
+  \item ensure compressions are \alert{structurally} and
+    \alert{semantically} valid
+  \end{itemize}
+%}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Compression Model}
+  \begin{block}{Integer Linear Programming Formulation}
+    \begin{itemize}
+    \item trigram language model and significance score:
+%    \item Significance score.
+      \begin{displaymath}
+        \mathbf{c}^* = \arg\!\max_c \sum_{i=1}^n P(w_i|w_{i-1}, w_{i-2}) + \sum_{i=1}^n I(w_i)        
+      \end{displaymath}
+    \item requires \alert{no parallel corpus}
+    \item compresses sentences sequentially
+    \end{itemize}
+  \end{block}
+\onslide+<2>{
+  \begin{block}{Decision Variables}
+    \begin{displaymath}
+      y_i = \left\{ \begin{array}{ll}
+          1 & \textsf{if $w_i$ is in the compression}\\
+          0 & \textsf{otherwise}
+        \end{array} \right.  (1 \leq i \leq n)
+    \end{displaymath}
+  \end{block}
+}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsection{Constraints}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Modifier Constraints}
+  \only<1>{
+    %\begin{block}{Modifier Constraints}
+ Ensure the \alert{relationships} between \alert{head} words and their
+ \alert{modifiers} remain grammatical.
+\vspace{1em}
+
+      \begin{enumerate}
+      \item If a modifier is in the compression, its head word must be
+        included:
+      %
+      \begin{eqnarray}
+        \label{eq:lm-modhead}
+        y_{head} - y_{modifer} \geq 0 \nonumber
+      \end{eqnarray}
+
+      \item Do not drop  \word{not} if the head word is in the compression
+        (same for words like \word{his}, \word{our}  and
+        genitives). 
+  %
+\begin{eqnarray}
+        \label{eq:lm-mpt}
+        y_{head} - y_{not} = 0 \nonumber
+      \end{eqnarray}
+
+      \end{enumerate}
+    }
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Sentential Constraints}
+  \only<1>{
+ Take  \alert{overall sentence}  structure into account.
+\vspace{1em}
+
+ \begin{enumerate}
+    \item If a verb is in the compression then so are its arguments, and
+      vice-versa:
+%
+    \begin{eqnarray}
+      \label{eq:lm-verbso}
+      y_{subject/object} - y_{verb} = 0 \nonumber
+    \end{eqnarray}
+%
+    \item The compression must contain \alert{at least one verb}.
+
+       \begin{eqnarray}
+      \label{eq:lm-verb}
+      \sum_{i \in verbs} y_{i} \geq 1 \nonumber
+    \end{eqnarray}
+
+    \end{enumerate}
+  }
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Discourse Constraints} 
+
+Take \alert{overall document} into account and preserve its
+\alert{coherence}. 
+\vspace{1em}
+      \begin{enumerate}
+      \item Do not drop centers and their references.
+        \begin{displaymath}
+          y_{center} = 1
+        \end{displaymath}
+      \item Do not drop words in topical lexical chains.
+        \begin{displaymath}
+          y_{topical} = 1          
+        \end{displaymath}
+      \item Do not drop personal pronouns. 
+        \begin{displaymath}
+         y_{personal~pronoun} = 1
+        \end{displaymath}
+
+      \end{enumerate}
+    %\end{block}
+\end{frame}    
+
+\begin{frame}
+    \frametitle{Compressed Document}
+\only<1>{
+    \begin{exampleblock}{}
+\begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+1.  &       Weather dashed hopes to halt the flow.\\
+2.  &       Experts say that, the \alert{pressure bring cascading down} to the town.\\
+3.  &      Some estimate \alert{at a rate of 15ft} from a fissure opened in mid-December.\\
+4.  &      The Italian Army detonated 400lb of dynamite.\\
+\end{tabularx}
+    \end{exampleblock}
+}
+  \only<2>{
+    \begin{exampleblock}{}
+\begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+1. &      Weather dashed hopes to halt the flow \fixed{in the lava's momentum}. \\
+2. &      Some experts say that, the pressure \fixed{of lava would bring debris} cascading down.\\
+3. &     \fixed{The volcano is pouring out million tons of debris a day}.\\
+4. &      The Italian Army \fixed{yesterday} detonated 400lb of dynamite.\\
+\end{tabularx}
+    \end{exampleblock}
+  }
+  
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Experiments}
+
+\subsection{Evaluation}
+
+\begin{frame}
+  \frametitle{Evaluation} 
+\begin{block}{Motivation}
+Assume the compressed document is a replacement for original:
+  \begin{enumerate}
+  \item is the compressed document readable?
+  \item Is the key information from original preserved in
+    compression?
+  \end{enumerate}
+\end{block}
+
+  \begin{block}{Question-answering paradigm}
+  \begin{itemize}
+  \item How many questions can we answer accurately by reading
+    the compressed document? 
+ \item  Questions derived from source document.
+  \item Two annotators created Q\&A pairs. 
+  \item Fact-based questions requiring unambiguous answers.
+  \end{itemize}
+\end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Experimental Setup}
+  \begin{itemize}
+  \item Created document-based compression corpus (available from 
+    \url{http://homepages.inf.ed.ac.uk/s0460084/data/}). 
+  \item Six documents with five to eight questions per document.
+  \item Three conditions: gold standard, McDonald (2006), Discourse ILP.
+  \item Sixty participants over the web.
+  \item Rate readability on seven point scale.
+  \item Answer questions one at a time using  compressed   document.
+  \end{itemize}
+
+\vspace{.5em}
+\onslide+<2>{\textbf{Mcdonald (2006):} discriminative,
+  state-of-the-art model, with  large sentence-based feature space.} 
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Example Questions and Answers}
+  \begin{exampleblock}{}
+    \begin{center}
+      \begin{tabularx}{\textwidth}{l@{\hspace{0.5em}}X}
+1 &      Weather dashed hopes to halt the flow in the lava's momentum. \\
+2 &      Some experts say that, the pressure of lava would bring debris cascading down.\\
+3 &     The volcano is pouring out million tons of debris a day.\\
+4 &      The Italian Army yesterday detonated 400lb of dynamite.\\
+        \end{tabularx}
+      \end{center}
+    \end{exampleblock}
+
+  \begin{center}
+\begin{tabular}{l@{\hspace{0.3em}}l}
+\hspace*{-1.7ex}\textbf{Q:} What  is posing a threat to the town? &
+\hspace*{.5ex}\textbf{A:} lava \\ 
+\hspace*{-1.7ex}\textbf{Q:} What hindered attempts to stop the lava
+flow? &\hspace*{.5ex}\textbf{A:} bad weather \\
+\hspace*{-1.7ex}\textbf{Q:} What did the Army do to stop the lava flow? &\hspace*{.5ex}\textbf{A:} detonate explosives \\
+\end{tabular}
+  \end{center}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Results}
+
+\begin{frame}
+  \frametitle{Results}
+  \begin{center}
+ \begin{tabular}{|l|c|c|c|} \hline
+   \multicolumn{1}{|c|}{Model}   & CompR & Readability & Q\&A  \\
+   \hline
+   McDonald 2006    & 60.1\% & \alert<2>{2.65} & \alert<4>{54.4\%}\\
+   Discourse ILP    & 65.4\% & \alert<2>{3.00} & \alert<4>{67.8\%} \\
+   Gold Standard    & 70.3\% & \alert<3>{5.27} & \alert<5>{82.2\%} \\
+   \hline
+ \end{tabular}
+\end{center}
+
+
+
+  \begin{itemize}
+\onslide+<2->{  \item On readability Discourse ILP and
+  McDonald are not sig. different}
+\onslide+<3->{\item Both models are sig. worse than gold standard}
+\onslide+<4->{\item On Q\&A task Discourse ILP is sig. better than McDonald}
+\onslide+<5->{\item Both models sig. worse than gold standard}
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Conclusions}
+
+\textbf{Contributions:} 
+  \begin{itemize}
+  \item discourse-based sentence compression model
+  \item formulated within the ILP framework using global constraints  
+  \item unsupervised, relatively simple and intuitive model 
+  \item document-based evaluation using a Q\&A task-based paradigm
+  \item performance gains over supervised  discourse  agnostic system
+\end{itemize}
+
+\vspace{.5ex}
+\textbf{Future work:}
+\begin{itemize}
+\item interface compression model with sentence extraction
+\item study the effect of global discourse structure \\
+ (Daum\'{e} III  and Marcu 2002)
+\item explore the effect of discourse for other models
+\end{itemize}
+\end{frame}
+
+\appendix
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Q\&A Task}
+  \begin{itemize}
+  \item Each question presented in turn.  No corrections allowed.
+  \item Answers marked consistently across all three systems.
+  \end{itemize}
+  
+    \begin{center}
+      \begin{tabular}{lll}
+        \multicolumn{3}{l}{\textbf{Q:} What is posing a threat to the town?} \\
+        \textbf{A:} Lava & Volcano & Lava from Mount Etna \vspace{1.0ex}\\
+        \multicolumn{3}{l}{\textbf{Q:} What hindered attempts to stop the lava flow?} \\
+        \textbf{A:} Bad weather & Snow and winds & The weather - snow \vspace{1.0ex}\\
+        \multicolumn{3}{l}{\textbf{Q:} What did the Army do to stop the lava flow?} \\
+        \textbf{A:} Detonate explosives & Used explosives & Detonate dynamite   \\
+      \end{tabular}
+    \end{center}
+\end{frame}
+
+\end{document}
+
+
